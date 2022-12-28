@@ -32,6 +32,8 @@ const R_PI: [u8; 256] = [0xA5, 0x2D, 0x32, 0x8F, 0x0E, 0x30, 0x38, 0xC0, 0x54, 0
     0x90, 0xD0, 0x24, 0x34, 0xCB, 0xED, 0xF4, 0xCE, 0x99, 0x10, 0x44, 0x40, 0x92, 0x3A, 0x01, 0x26,
     0x12, 0x1A, 0x48, 0x68, 0xF5, 0x81, 0x8B, 0xC7, 0xD6, 0x20, 0x0A, 0x08, 0x00, 0x4C, 0xD7, 0x74];
 
+const l_vector: [u8; 16] = [1, 148, 32, 133, 16, 194, 192, 1, 251, 1, 192, 194, 16, 133, 32, 148];
+
 pub struct Gost {
     key: [u8; 32],
     round_consts: [[u8; 32]; 16],
@@ -48,10 +50,26 @@ fn init_round_const() {
 
 }
 
+fn r(input: [u8; 16]) -> [u8; 16] {
+    let mut a15: u8 = 0;
+    let mut output: [u8; 16] = [0; 16];
+    for i in (0..16).rev() {
+        if i == 0 {
+            output[15] = input[i];
+        }
+        else {
+            output[i - 1] = input[i];
+        }
+        a15 ^= multiply_gf(input[i], l_vector[i]);
+    }
+    output[15] = a15;
+    output
+}
+
 fn multiply_gf(mut left: u8, mut right: u8) -> u8 {
     let mut result: u8 = 0;
     let mut h_bit: u8;
-    for i in 1..8 {
+    for _ in 1..8 {
         if (right & 1) == 1 {
             result ^= left;
         }
