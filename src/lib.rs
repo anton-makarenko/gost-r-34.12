@@ -45,7 +45,7 @@ impl Gost {
         Gost { key }
     }
 
-    fn init_round_const(&mut self) {
+    fn init_round_consts(&mut self) {
         let mut round_num: [[u8; 16]; 32] = [[0; 16]; 32];
         for i in 0..32 {
             round_num[i][0] = (i + 1) as u8;
