@@ -159,3 +159,15 @@ fn feistel_round(in_left: [u8; 16], in_right: [u8; 16], round_const: [u8; 16]) -
     let out_left = xor(temp, in_right);
     [out_left, out_right]
 }
+
+// fn r_s(input: [u8; 16]) -> [u8; 16] {
+//     let mut output: [u8; 16] = [0; 16];
+//     for i in 0..16 {
+//         output[i] = R_PI[input[i] as usize];
+//     }
+//     output
+// }
+//
+// fn r_r(input: [u8; 16]) -> [u8; 16] {
+//
+// }
