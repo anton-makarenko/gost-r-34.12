@@ -78,6 +78,17 @@ impl Gost {
             }
         }
     }
+
+    pub fn encrypt(&self, input_block: [u8; 16]) -> [u8; 16] {
+        let mut output_block: [u8; 16] = [0; 16];
+        output_block.copy_from_slice(&input_block);
+        for i in 0..9 {
+            output_block = xor(output_block, self.round_keys[i]);
+            output_block = s(output_block);
+            output_block = l(output_block);
+        }
+        output_block
+    }
 }
 
 fn r(input: [u8; 16]) -> [u8; 16] {
@@ -96,11 +107,19 @@ fn r(input: [u8; 16]) -> [u8; 16] {
     output
 }
 
-fn l(mut input: [u8; 16]) -> [u8; 16] {
+fn l(input: [u8; 16]) -> [u8; 16] {
     let mut output: [u8; 16] = [0; 16];
     output.copy_from_slice(&input);
     for _ in 0..16 {
         output = r(input);
+    }
+    output
+}
+
+fn s(input: [u8; 16]) -> [u8; 16] {
+    let mut output: [u8; 16] = [0; 16];
+    for i in 0..16 {
+        output[i] = PI[input[i] as usize];
     }
     output
 }
@@ -139,8 +158,4 @@ fn feistel_round(in_left: [u8; 16], in_right: [u8; 16], round_const: [u8; 16]) -
     temp = l(temp);
     let out_left = xor(temp, in_right);
     [out_left, out_right]
-}
-
-pub fn encrypt(input: &[u8]) -> &[u8] {
-    &R_PI
 }
