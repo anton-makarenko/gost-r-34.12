@@ -89,6 +89,17 @@ impl Gost {
         }
         output_block
     }
+
+    pub fn decrypt(&self, input_block: [u8; 16]) -> [u8; 16] {
+        let mut output_block: [u8; 16] = [0; 16];
+        output_block.copy_from_slice(&input_block);
+        for i in 0..9 {
+            output_block = xor(output_block, self.round_keys[i]);
+            output_block = r_s(output_block);
+            output_block = r_l(output_block);
+        }
+        output_block
+    }
 }
 
 fn r(input: [u8; 16]) -> [u8; 16] {
@@ -176,5 +187,14 @@ fn r_r(input: [u8; 16]) -> [u8; 16] {
         a0 ^= multiply_gf(output[i], L_VECTOR[i]);
     }
     output[0] = a0;
+    output
+}
+
+fn r_l(input: [u8; 16]) -> [u8; 16] {
+    let mut output: [u8; 16] = [0; 16];
+    output.copy_from_slice(&input);
+    for _ in 0..16 {
+        output = r_r(input);
+    }
     output
 }
