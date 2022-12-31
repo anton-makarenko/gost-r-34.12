@@ -167,7 +167,14 @@ fn r_s(input: [u8; 16]) -> [u8; 16] {
     }
     output
 }
-//
-// fn r_r(input: [u8; 16]) -> [u8; 16] {
-//
-// }
+
+fn r_r(input: [u8; 16]) -> [u8; 16] {
+    let mut a0 = input[15];
+    let mut output = [0; 16];
+    for i in 1..16 {
+        output[i] = input[i - 1];
+        a0 ^= multiply_gf(output[i], L_VECTOR[i]);
+    }
+    output[0] = a0;
+    output
+}
