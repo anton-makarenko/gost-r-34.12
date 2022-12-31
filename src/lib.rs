@@ -36,18 +36,24 @@ const L_VECTOR: [u8; 16] = [1, 148, 32, 133, 16, 194, 192, 1, 251, 1, 192, 194, 
 
 pub struct Gost {
     key: [u8; 32],
-    round_consts: [[u8; 32]; 16],
-    round_keys: [[u8; 10]; 16],
+    round_consts: [[u8; 16]; 32],
+    round_keys: [[u8; 16]; 10],
 }
 
 impl Gost {
     pub fn new(key: [u8; 32]) {
         Gost { key }
     }
-}
 
-fn init_round_const() {
-
+    fn init_round_const(&mut self) {
+        let mut round_num: [[u8; 16]; 32] = [[0; 16]; 32];
+        for i in 0..32 {
+            round_num[i][0] = (i + 1) as u8;
+        }
+        for i in 0..32 {
+            self.round_consts[i] = l(round_num[i]);
+        }
+    }
 }
 
 fn r(input: [u8; 16]) -> [u8; 16] {
@@ -63,6 +69,15 @@ fn r(input: [u8; 16]) -> [u8; 16] {
         a15 ^= multiply_gf(input[i], L_VECTOR[i]);
     }
     output[15] = a15;
+    output
+}
+
+fn l(mut input: [u8; 16]) -> [u8; 16] {
+    let mut output: [u8; 16] = [0; 16];
+    output.copy_from_slice(&input);
+    for _ in 0..16 {
+        output = r(input);
+    }
     output
 }
 
