@@ -41,8 +41,18 @@ pub struct Gost {
 }
 
 impl Gost {
-    pub fn new(key: [u8; 32]) {
-        Gost { key }
+    pub fn new(key: [u8; 32]) -> Gost {
+        let mut gost = Gost {
+            key,
+            round_consts: [[0; 16]; 32],
+            round_keys: [[0; 16]; 10],
+        };
+        let mut left_part: [u8; 16] = [0; 16];
+        let mut right_part: [u8; 16] = [0; 16];
+        left_part.copy_from_slice(&key[..16]);
+        right_part.copy_from_slice(&key[16..]);
+        gost.init_round_keys(left_part, right_part);
+        gost
     }
 
     fn init_round_consts(&mut self) {
@@ -52,6 +62,20 @@ impl Gost {
         }
         for i in 0..32 {
             self.round_consts[i] = l(round_num[i]);
+        }
+    }
+
+    fn init_round_keys(&mut self, left: [u8; 16], right: [u8; 16]) {
+        self.init_round_consts();
+        self.round_keys[0].copy_from_slice(&left);
+        self.round_keys[1].copy_from_slice(&right);
+        let mut cur_round: [[u8; 16]; 2] = [left, right];
+        for i in 0..4 {
+            for j in 0..8 {
+                cur_round = feistel_round(cur_round[0], cur_round[1], self.round_consts[j + 8 * i]);
+                self.round_keys[2 * i + 2] = cur_round[0];
+                self.round_keys[2 * i + 3] = cur_round[1];
+            }
         }
     }
 }
@@ -96,6 +120,25 @@ fn multiply_gf(mut left: u8, mut right: u8) -> u8 {
         right >>= 1;
     }
     result
+}
+
+fn xor(left: [u8; 16], right: [u8; 16]) -> [u8; 16] {
+    let mut result: [u8; 16] = [0; 16];
+    for i in 0..16 {
+        result[i] = left[i] ^ right[i];
+    }
+    result
+}
+
+fn feistel_round(in_left: [u8; 16], in_right: [u8; 16], round_const: [u8; 16]) -> [[u8; 16]; 2] {
+    let mut temp: [u8; 16];
+    let mut out_right: [u8; 16] = [0; 16];
+    out_right.copy_from_slice(&in_left);
+    temp = xor(in_left, round_const);
+    temp = s(temp);
+    temp = l(temp);
+    let out_left = xor(temp, in_right);
+    [out_left, out_right]
 }
 
 pub fn encrypt(input: &[u8]) -> &[u8] {
