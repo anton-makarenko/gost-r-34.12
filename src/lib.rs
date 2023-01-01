@@ -35,7 +35,7 @@ const R_PI: [u8; 256] = [0xA5, 0x2D, 0x32, 0x8F, 0x0E, 0x30, 0x38, 0xC0, 0x54, 0
 const L_VECTOR: [u8; 16] = [1, 148, 32, 133, 16, 194, 192, 1, 251, 1, 192, 194, 16, 133, 32, 148];
 
 pub struct Gost {
-    key: [u8; 32],
+    // key: [u8; 32],
     round_consts: [[u8; 16]; 32],
     round_keys: [[u8; 16]; 10],
 }
@@ -43,7 +43,7 @@ pub struct Gost {
 impl Gost {
     pub fn new(key: [u8; 32]) -> Gost {
         let mut gost = Gost {
-            key,
+            // key,
             round_consts: [[0; 16]; 32],
             round_keys: [[0; 16]; 10],
         };
@@ -144,7 +144,7 @@ fn multiply_gf(mut left: u8, mut right: u8) -> u8 {
         }
         h_bit = left & 0x80;
         left <<= 1;
-        if h_bit < 0 {
+        if (h_bit as i8) < 0 {
             left ^= 0xC3;
         }
         right >>= 1;
