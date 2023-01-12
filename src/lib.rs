@@ -51,6 +51,7 @@ impl Gost {
         let mut right_part: [u8; 16] = [0; 16];
         left_part.copy_from_slice(&key[..16]);
         right_part.copy_from_slice(&key[16..]);
+        gost.init_round_consts();
         gost.init_round_keys(left_part, right_part);
         gost
     }
@@ -66,7 +67,6 @@ impl Gost {
     }
 
     fn init_round_keys(&mut self, left: [u8; 16], right: [u8; 16]) {
-        self.init_round_consts();
         self.round_keys[0].copy_from_slice(&left);
         self.round_keys[1].copy_from_slice(&right);
         let mut cur_round: [[u8; 16]; 2] = [left, right];
@@ -122,7 +122,7 @@ fn l(input: [u8; 16]) -> [u8; 16] {
     let mut output: [u8; 16] = [0; 16];
     output.copy_from_slice(&input);
     for _ in 0..16 {
-        output = r(input);
+        output = r(output);
     }
     output
 }
@@ -147,7 +147,11 @@ fn multiply_gf(mut left: u8, mut right: u8) -> u8 {
         if (h_bit as i8) < 0 {
             left ^= 0xC3;
         }
+        let check = (right as i8) < 0;
         right >>= 1;
+        if check {
+            right ^= 128;
+        }
     }
     result
 }
