@@ -138,7 +138,7 @@ fn s(input: [u8; 16]) -> [u8; 16] {
 fn multiply_gf(mut left: u8, mut right: u8) -> u8 {
     let mut result: u8 = 0;
     let mut h_bit: u8;
-    for _ in 1..8 {
+    for _ in 0..8 {
         if (right & 1) == 1 {
             result ^= left;
         }
@@ -147,9 +147,9 @@ fn multiply_gf(mut left: u8, mut right: u8) -> u8 {
         if (h_bit as i8) < 0 {
             left ^= 0xC3;
         }
-        let check = (right as i8) < 0;
+        let check_right = (right as i8) < 0;
         right >>= 1;
-        if check {
+        if check_right {
             right ^= 128;
         }
     }
