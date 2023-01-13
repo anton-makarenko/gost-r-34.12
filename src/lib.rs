@@ -87,13 +87,15 @@ impl Gost {
             output_block = s(output_block);
             output_block = l(output_block);
         }
+        output_block = xor(output_block, self.round_keys[9]);
         output_block
     }
 
     pub fn decrypt(&self, input_block: [u8; 16]) -> [u8; 16] {
         let mut output_block: [u8; 16] = [0; 16];
         output_block.copy_from_slice(&input_block);
-        for i in 0..9 {
+        output_block = xor(output_block, self.round_keys[9]);
+        for i in (0..9).rev() {
             output_block = xor(output_block, self.round_keys[i]);
             output_block = r_s(output_block);
             output_block = r_l(output_block);
