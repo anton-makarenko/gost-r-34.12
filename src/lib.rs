@@ -96,9 +96,9 @@ impl Gost {
         output_block.copy_from_slice(&input_block);
         output_block = xor(output_block, self.round_keys[9]);
         for i in (0..9).rev() {
-            output_block = xor(output_block, self.round_keys[i]);
-            output_block = r_s(output_block);
             output_block = r_l(output_block);
+            output_block = r_s(output_block);
+            output_block = xor(output_block, self.round_keys[i]);
         }
         output_block
     }
@@ -200,7 +200,7 @@ fn r_l(input: [u8; 16]) -> [u8; 16] {
     let mut output: [u8; 16] = [0; 16];
     output.copy_from_slice(&input);
     for _ in 0..16 {
-        output = r_r(input);
+        output = r_r(output);
     }
     output
 }
