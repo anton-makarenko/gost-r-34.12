@@ -43,7 +43,6 @@ pub struct Gost {
 impl Gost {
     pub fn new(key: [u8; 32]) -> Gost {
         let mut gost = Gost {
-            // key,
             round_consts: [[0; 16]; 32],
             round_keys: [[0; 16]; 10],
         };
@@ -67,8 +66,8 @@ impl Gost {
     }
 
     fn init_round_keys(&mut self, left: [u8; 16], right: [u8; 16]) {
-        self.round_keys[0].copy_from_slice(&left);
-        self.round_keys[1].copy_from_slice(&right);
+        self.round_keys[0] = left;
+        self.round_keys[1] = right;
         let mut cur_round: [[u8; 16]; 2] = [left, right];
         for i in 0..4 {
             for j in 0..8 {
@@ -80,8 +79,7 @@ impl Gost {
     }
 
     pub fn encrypt(&self, input_block: [u8; 16]) -> [u8; 16] {
-        let mut output_block: [u8; 16] = [0; 16];
-        output_block.copy_from_slice(&input_block);
+        let mut output_block = input_block;
         for i in 0..9 {
             output_block = xor(output_block, self.round_keys[i]);
             output_block = s(output_block);
@@ -92,8 +90,7 @@ impl Gost {
     }
 
     pub fn decrypt(&self, input_block: [u8; 16]) -> [u8; 16] {
-        let mut output_block: [u8; 16] = [0; 16];
-        output_block.copy_from_slice(&input_block);
+        let mut output_block = input_block;
         output_block = xor(output_block, self.round_keys[9]);
         for i in (0..9).rev() {
             output_block = r_l(output_block);
@@ -121,8 +118,8 @@ fn r(input: [u8; 16]) -> [u8; 16] {
 }
 
 fn l(input: [u8; 16]) -> [u8; 16] {
-    let mut output: [u8; 16] = [0; 16];
-    output.copy_from_slice(&input);
+    // let mut output: [u8; 16] = [0; 16];
+    let mut output = input;
     for _ in 0..16 {
         output = r(output);
     }
@@ -168,8 +165,7 @@ fn xor(left: [u8; 16], right: [u8; 16]) -> [u8; 16] {
 
 fn feistel_round(in_left: [u8; 16], in_right: [u8; 16], round_const: [u8; 16]) -> [[u8; 16]; 2] {
     let mut temp: [u8; 16];
-    let mut out_right: [u8; 16] = [0; 16];
-    out_right.copy_from_slice(&in_left);
+    let out_right = in_left;
     temp = xor(in_left, round_const);
     temp = s(temp);
     temp = l(temp);
@@ -197,8 +193,7 @@ fn r_r(input: [u8; 16]) -> [u8; 16] {
 }
 
 fn r_l(input: [u8; 16]) -> [u8; 16] {
-    let mut output: [u8; 16] = [0; 16];
-    output.copy_from_slice(&input);
+    let mut output = input;
     for _ in 0..16 {
         output = r_r(output);
     }
